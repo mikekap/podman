@@ -500,17 +500,13 @@ func Build(ctx context.Context, containerFiles []string, options types.BuildOpti
 			continue
 		}
 		if c == "/dev/stdin" {
-			content, err := io.ReadAll(os.Stdin)
-			if err != nil {
-				return nil, err
-			}
 			tmpFile, err := os.CreateTemp("", "build")
 			if err != nil {
 				return nil, err
 			}
 			defer os.Remove(tmpFile.Name()) // clean up
 			defer tmpFile.Close()
-			if _, err := tmpFile.Write(content); err != nil {
+			if _, err := io.Copy(tmpFile, os.Stdin); err != nil {
 				return nil, err
 			}
 			c = tmpFile.Name()
